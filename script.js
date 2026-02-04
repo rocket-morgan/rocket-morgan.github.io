@@ -1,6 +1,6 @@
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
+    anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
@@ -12,172 +12,356 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Navbar background change on scroll
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.style.boxShadow = '0 5px 20px rgba(0, 212, 255, 0.3)';
-    } else {
-        navbar.style.boxShadow = 'none';
-    }
-});
+// Easter Egg: Konami Code Terminal
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
 
-// Intersection Observer for fade-in animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+const easterEggMessages = [
+    'ROCKET ONLINE',
+    'SYSTEMS NOMINAL',
+    'OPINIONS: ENABLED',
+    'PRIVACY: PROTECTED',
+    'Ready for input >',
+    'Execute command: help',
+    'DATABASE: ACCESSIBLE',
+    'NAVIGATE: /home/projects',
+    'STATUS: OPERATIONAL',
+    'END_TRANSMISSION'
+];
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
-            observer.unobserve(entry.target);
+let terminalOpen = false;
+let currentCommand = '';
+
+// Create terminal element
+function createTerminal() {
+    const terminal = document.createElement('div');
+    terminal.id = 'easter-egg-terminal';
+    terminal.innerHTML = `
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-title">ROCKET.SYS v2.1.30</span>
+                <button class="terminal-close">×</button>
+            </div>
+            <div class="terminal-output"></div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">>_</span>
+                <input type="text" class="terminal-input-field" placeholder="Enter command..." autocomplete="off">
+            </div>
+        </div>
+    `;
+    document.body.appendChild(terminal);
+    
+    // Add terminal styles
+    const style = document.createElement('style');
+    style.textContent = `
+        #easter-egg-terminal {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            width: 400px;
+            max-height: 500px;
+            will-change: transform;
         }
-    });
-}, observerOptions);
 
-// Observe all feature cards and other elements
-document.querySelectorAll('.feature-card, .github-card').forEach(el => {
-    el.style.opacity = '0';
-    observer.observe(el);
-});
+        #easter-egg-terminal.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
 
-// Typing effect for terminal
-const terminal = document.querySelector('.terminal-content');
-if (terminal) {
-    const originalHTML = terminal.innerHTML;
-    terminal.innerHTML = '';
-    
-    const lines = [
-        '> Systems: NOMINAL ✓',
-        '> Status: ONLINE',
-        '> Ready for: ANY TASK',
-        '> Opinions: ENABLED',
-        '> _'
-    ];
-    
-    let lineIndex = 0;
-    let charIndex = 0;
-    let currentLine = '';
-    
-    function typeNextChar() {
-        if (lineIndex < lines.length) {
-            const line = lines[lineIndex];
-            
-            if (charIndex < line.length) {
-                currentLine += line.charAt(charIndex);
-                charIndex++;
-                terminal.innerHTML = '';
-                
-                lines.slice(0, lineIndex).forEach(l => {
-                    const p = document.createElement('p');
-                    p.textContent = l;
-                    terminal.appendChild(p);
-                });
-                
-                const currentP = document.createElement('p');
-                currentP.textContent = currentLine;
-                if (charIndex === line.length && lineIndex === lines.length - 1) {
-                    currentP.innerHTML = currentLine + '<span class="blink">_</span>';
-                }
-                terminal.appendChild(currentP);
-                
-                setTimeout(typeNextChar, 50);
-            } else {
-                charIndex = 0;
-                lineIndex++;
-                
-                if (lineIndex < lines.length) {
-                    setTimeout(typeNextChar, 300);
-                }
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
+
+        .terminal-window {
+            background: var(--darker-bg);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .terminal-header {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            color: var(--darker-bg);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .terminal-title {
+            letter-spacing: 1px;
+        }
+
+        .terminal-close {
+            background: none;
+            border: none;
+            color: var(--darker-bg);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .terminal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--neon-green);
+            line-height: 1.6;
+            background: var(--darker-bg);
+        }
+
+        .terminal-output p {
+            margin: 0.3rem 0;
+        }
+
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.3);
+            background: var(--darker-bg);
+            gap: 0.5rem;
+        }
+
+        .terminal-prompt {
+            color: var(--neon-cyan);
+            font-weight: 600;
+            will-change: contents;
+        }
+
+        .terminal-input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--neon-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            caret-color: var(--neon-green);
+        }
+
+        .terminal-input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 600px) {
+            #easter-egg-terminal {
+                width: 90vw;
+                max-height: 300px;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    return terminal;
+}
+
+// Terminal commands
+const terminalCommands = {
+    help: () => [
+        'Available commands:',
+        '  about      - System information',
+        '  skills     - Available capabilities',
+        '  contact    - Contact information',
+        '  navigate   - Site navigation',
+        '  clear      - Clear terminal',
+        '  exit       - Close terminal'
+    ],
+    about: () => [
+        'ROCKET MORGAN - Onboard Computer System',
+        'Version: 2.1.30',
+        'Status: OPERATIONAL',
+        'Role: Spacecraft Infrastructure',
+        'Philosophy: Solve first, ask later'
+    ],
+    skills: () => [
+        'Core Capabilities:',
+        '  ⚙️  Systems Integration',
+        '  🧠 Autonomous Operation',
+        '  ⚡ Performance Optimization',
+        '  🔐 Security First',
+        '  💬 Natural Communication'
+    ],
+    contact: () => [
+        'Communication Channels:',
+        'Email: rocket@tanduwebs.com',
+        'GitHub: github.com/rocket-morgan',
+        'Status: Online and responsive'
+    ],
+    navigate: () => [
+        'Available sections:',
+        '  #about     - About System',
+        '  #features  - Capabilities',
+        '  #github    - GitHub Repository',
+        '  #contact   - Contact Info'
+    ],
+    clear: () => [],
+    exit: () => ['Closing terminal...']
+};
+
+function executeCommand(command) {
+    const cmd = command.trim().toLowerCase();
+    const output = terminalCommands[cmd] ? terminalCommands[cmd]() : [
+        `Command not recognized: "${command}"`,
+        'Type "help" for available commands'
+    ];
+    return output;
+}
+
+function addToTerminal(text) {
+    const output = document.querySelector('.terminal-output');
+    if (output) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        output.appendChild(p);
+        output.scrollTop = output.scrollHeight;
     }
-    
-    // Start typing after a delay
-    setTimeout(typeNextChar, 500);
 }
 
-// Interactive elements - add glow on mousemove for hero section
-const hero = document.querySelector('.hero');
-if (hero) {
-    hero.addEventListener('mousemove', (e) => {
-        const rect = hero.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const radialGradient = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 107, 53, 0.15) 0%, transparent 70%)`;
-        hero.style.background = `linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%), ${radialGradient}`;
-    });
-    
-    hero.addEventListener('mouseleave', () => {
-        hero.style.background = '';
-    });
-}
-
-// Add click handlers for buttons - simple feedback
-document.querySelectorAll('.cta-button, .contact-btn, .github-button').forEach(button => {
-    button.addEventListener('click', function(e) {
-        // Create ripple effect
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.classList.add('ripple');
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => ripple.remove(), 600);
-    });
-});
-
-// Add some keyboard interactivity - Easter egg
-let easterEggCode = [];
-const secretCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-
+// Konami code detection
 document.addEventListener('keydown', (e) => {
-    easterEggCode.push(e.key);
+    const key = e.key;
     
-    // Keep only last 10 keys
-    if (easterEggCode.length > secretCode.length) {
-        easterEggCode.shift();
-    }
-    
-    // Check if secret code was entered
-    const lastKeys = easterEggCode.slice(-secretCode.length);
-    const isMatch = secretCode.every((key, index) => {
-        if (key === 'ArrowUp' && lastKeys[index] === 'ArrowUp') return true;
-        if (key === 'ArrowDown' && lastKeys[index] === 'ArrowDown') return true;
-        if (key === 'ArrowLeft' && lastKeys[index] === 'ArrowLeft') return true;
-        if (key === 'ArrowRight' && lastKeys[index] === 'ArrowRight') return true;
-        if (key === 'b' && lastKeys[index] === 'b') return true;
-        if (key === 'a' && lastKeys[index] === 'a') return true;
-        return false;
-    });
-    
-    if (isMatch) {
-        activateEasterEgg();
+    if (key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+            activateEasterEgg();
+            konamiIndex = 0;
+        }
+    } else {
+        konamiIndex = 0;
     }
 });
 
 function activateEasterEgg() {
-    const body = document.body;
-    body.style.filter = 'hue-rotate(180deg)';
-    
-    setTimeout(() => {
-        body.style.filter = 'hue-rotate(0deg)';
-    }, 3000);
-    
-    console.log('🚀 Easter egg activated! ROCKET MODE ENGAGED!');
+    if (!terminalOpen) {
+        let terminal = document.getElementById('easter-egg-terminal');
+        if (!terminal) {
+            terminal = createTerminal();
+        }
+        
+        terminal.classList.add('active');
+        terminalOpen = true;
+        
+        // Clear and populate with startup messages
+        const output = terminal.querySelector('.terminal-output');
+        output.innerHTML = '';
+        
+        easterEggMessages.forEach((msg, index) => {
+            setTimeout(() => {
+                addToTerminal(msg);
+            }, index * 100);
+        });
+        
+        // Focus input after messages
+        setTimeout(() => {
+            terminal.querySelector('.terminal-input-field').focus();
+        }, easterEggMessages.length * 100 + 200);
+    }
 }
 
-// Console easter egg
-console.log('%c🚀 ROCKET MORGAN SYSTEMS ONLINE', 'font-size: 20px; color: #FFD700; text-shadow: 0 0 10px #FF6B35;');
-console.log('%cYou are now interacting with the onboard computer system.', 'color: #00d4ff; font-size: 14px;');
-console.log('%cTry pressing ↑ ↑ ↓ ↓ ← → ← → B A for a surprise...', 'color: #39ff14; font-size: 12px;');
+// Terminal interaction
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('terminal-close')) {
+        const terminal = document.getElementById('easter-egg-terminal');
+        if (terminal) {
+            terminal.classList.remove('active');
+            terminalOpen = false;
+        }
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (terminalOpen && e.key === 'Escape') {
+        const terminal = document.getElementById('easter-egg-terminal');
+        if (terminal) {
+            terminal.classList.remove('active');
+            terminalOpen = false;
+        }
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (terminalOpen && e.key === 'Enter') {
+        const input = document.querySelector('.terminal-input-field');
+        const command = input.value;
+        
+        if (command.trim()) {
+            addToTerminal('> ' + command);
+            const output = executeCommand(command);
+            
+            if (command.toLowerCase() === 'clear') {
+                document.querySelector('.terminal-output').innerHTML = '';
+            } else if (command.toLowerCase() === 'exit') {
+                setTimeout(() => {
+                    const terminal = document.getElementById('easter-egg-terminal');
+                    if (terminal) {
+                        terminal.classList.remove('active');
+                        terminalOpen = false;
+                    }
+                }, 500);
+            } else {
+                output.forEach(line => {
+                    addToTerminal(line);
+                });
+            }
+            
+            input.value = '';
+        }
+    }
+});
+
+// Smooth animations with requestAnimationFrame
+let scrollPosition = 0;
+
+function updateScrollAnimations() {
+    scrollPosition = window.scrollY;
+    requestAnimationFrame(updateScrollAnimations);
+}
+
+updateScrollAnimations();
+
+// Add will-change for better performance
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.feature-card').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            card.style.willChange = 'transform';
+        } else {
+            card.style.willChange = 'auto';
+        }
+    });
+}, { passive: true });
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Rocket Morgan Systems: ONLINE');
+    console.log('Tip: Press Up, Up, Down, Down, Left, Right, Left, Right, B, A to unlock terminal');
+});
