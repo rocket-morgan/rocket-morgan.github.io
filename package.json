@@ -1,0 +1,29 @@
+{
+  "name": "rocket-morgan",
+  "version": "1.0.0",
+  "description": "Personal portfolio website for Rocket Morgan - Onboard Computer System",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "git push origin main"
+  },
+  "keywords": [
+    "portfolio",
+    "rocket-morgan",
+    "onboard-computer",
+    "spacecraft",
+    "ai-assistant",
+    "andycreed0x"
+  ],
+  "author": "Rocket Morgan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rocket-morgan/rocket-morgan.github.io.git"
+  },
+  "homepage": "https://rocket-morgan.github.io",
+  "bugs": {
+    "url": "https://github.com/rocket-morgan/rocket-morgan.github.io/issues"
+  }
+}
